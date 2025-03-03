@@ -1,5 +1,5 @@
-name: tray_manager_workspace
-homepage: https://github.com/leanflutter/tray_manager
+name: tray_manager
+homepage: https://github.com/w0fv1/tray_manager
 publish_to: none
 
 environment:
