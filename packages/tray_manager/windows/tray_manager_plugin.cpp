@@ -284,36 +284,36 @@ void TrayManagerPlugin::SetContextMenu(
 }
 
 void TrayManagerPlugin::PopUpContextMenu(
-    const flutter::MethodCall<flutter::EncodableValue>& method_call,
-    std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-  const flutter::EncodableMap& args =
-      std::get<flutter::EncodableMap>(*method_call.arguments());
+  const flutter::MethodCall<flutter::EncodableValue>& method_call,
+  std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+const flutter::EncodableMap& args =
+    std::get<flutter::EncodableMap>(*method_call.arguments());
 
-  bool bringAppToFront =
-      std::get<bool>(args.at(flutter::EncodableValue("bringAppToFront")));
+bool bringAppToFront =
+    std::get<bool>(args.at(flutter::EncodableValue("bringAppToFront")));
 
-  HWND hWnd = GetMainWindow();
+HWND hWnd = GetMainWindow();
 
-  double x, y;
+POINT cursorPos;
+GetCursorPos(&cursorPos);
+double x = cursorPos.x;
+double y = cursorPos.y;
 
-  // RECT rect;
-  // Shell_NotifyIconGetRect(&niif, &rect);
-
-  // x = rect.left + ((rect.right - rect.left) / 2);
-  // y = rect.top + ((rect.bottom - rect.top) / 2);
-
-  POINT cursorPos;
-  GetCursorPos(&cursorPos);
-  x = cursorPos.x;
-  y = cursorPos.y;
-
-  if (bringAppToFront) {
-    SetForegroundWindow(hWnd);
-  }
-  TrackPopupMenu(hMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, static_cast<int>(x),
-                 static_cast<int>(y), 0, hWnd, NULL);
-  result->Success(flutter::EncodableValue(true));
+if (bringAppToFront) {
+  SetForegroundWindow(hWnd);  // 确保窗口在前台
 }
+
+// 确保菜单在点击空白处时隐藏
+SetForegroundWindow(hWnd);
+TrackPopupMenu(hMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, static_cast<int>(x),
+               static_cast<int>(y), 0, hWnd, NULL);
+
+// 通过发送 WM_NULL 消息强制菜单在点击空白区域时隐藏
+PostMessage(hWnd, WM_NULL, 0, 0);
+
+result->Success(flutter::EncodableValue(true));
+}
+
 
 void TrayManagerPlugin::GetBounds(
     const flutter::MethodCall<flutter::EncodableValue>& method_call,
